@@ -1,15 +1,28 @@
 # all-in-furries
 
-To install dependencies:
+이 프로젝트는 AIF 서버에서 활용되는 디스코드 봇을 위한 것입니다.
+봇은 다양한 기능을 제공하며, 사용자는 봇과 상호작용할 수 있습니다.
 
-```bash
-bun install
+## 설치 방법
+
+실행하기 위해서는 `.env`에 다음을 추가해야 합니다:
+
+```
+DISCORD_BOT_TOKEN=<디스코드 봇 토큰>
+CLIENT_ID=<디스코드 봇 클라이언트 ID>
+GUILD_ID=<디스코드 길드 ID>
 ```
 
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.3.6. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+1. 저장소를 클론합니다:
+   ```
+   git clone
+   ```
+2. `.env` 파일을 프로젝트 루트 디렉토리에 생성하고 위의 환경 변수를 추가합니다.
+3. 필요한 패키지를 설치합니다:
+   ```
+   bun install
+   ```
+4. 봇을 실행합니다:
+   ```
+   bun run start
+   ```
