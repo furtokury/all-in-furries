@@ -41,6 +41,6 @@ export async function execute(interaction: any) {
 
   const total = rolls.reduce((a, b) => a + b, 0);
   await interaction.reply(
-    `주사위 결과: \`[${rolls.join(", ")}]\`, 총합: \`${total}\``,
+    `\`${input}\` 결과: \`[${rolls.join(", ")}]\`, 총합: \`${total}\``,
   );
 }
