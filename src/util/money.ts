@@ -1,7 +1,8 @@
 import path from "path";
 import fs from "fs/promises";
 
-const CURRENCY_SYMBOL = "₣";
+export const CURRENCY_SYMBOL = "₣";
+export const CURRENCY_NAME = "퍼";
 
 const BALANCES_FILE = "./data/balances.json";
 
@@ -21,7 +22,7 @@ async function ensureDataFileExists() {
   });
 }
 
-export async function getBalance(id: number): Promise<number> {
+export async function getBalance(id: string): Promise<number> {
   try {
     await ensureDataFileExists();
     const data = await fs.readFile(BALANCES_FILE, "utf-8");
@@ -35,7 +36,7 @@ export async function getBalance(id: number): Promise<number> {
   }
 }
 
-export async function setBalance(id: number, amount: number): Promise<void> {
+export async function setBalance(id: string, amount: number): Promise<void> {
   await ensureDataFileExists();
   const data = await fs.readFile(BALANCES_FILE, "utf-8");
   const balances = JSON.parse(data);
@@ -44,8 +45,8 @@ export async function setBalance(id: number, amount: number): Promise<void> {
 }
 
 export async function transferBalance(
-  fromId: number,
-  toId: number,
+  fromId: string,
+  toId: string,
   amount: number,
 ): Promise<void> {
   const fromBalance = await getBalance(fromId);
