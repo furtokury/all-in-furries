@@ -1,4 +1,6 @@
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { formatMoney, getBalance, setBalance } from "../../../util/money";
+import { createComponentCollector } from "./create-component-collector";
 
 const ROULETTE_MAP: Record<string, { multiplication: number; dice: number[] }> =
   {
@@ -164,7 +166,18 @@ export default async function (interaction: any): Promise<void> {
 
   setBalance(interaction.user.id, afterAmount);
 
-  await interaction.reply({
+  const readyButton = new ButtonBuilder()
+    .setCustomId("dice-roulette-ready")
+    .setLabel("준비 완료!")
+    .setStyle(ButtonStyle.Primary);
+  const row = new ActionRowBuilder().addComponents(readyButton);
+
+  const response = await interaction.reply({
     content: messages.join("\n"),
+    components: [row],
+    withResponse: true,
   });
+  const message = response.resource.message;
+
+  createComponentCollector(interaction, message);
 }
