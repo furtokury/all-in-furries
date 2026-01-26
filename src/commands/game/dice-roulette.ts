@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 import { createComponentCollector } from "./dice-roulette/create-component-collector";
 
-const IMAGE_URL =
+export const IMAGE_URL =
   "https://github.com/furtokury/all-in-furries/blob/main/res/dice_roulette_discord.png?raw=true";
 
 export const data = new SlashCommandBuilder()
