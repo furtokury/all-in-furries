@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import {
   getBalance,
   formatMoney,
@@ -69,7 +69,10 @@ async function executeLeaderboard(interaction: any) {
   const leaderboard = await getLeaderboard(limit, offset);
 
   if (leaderboard.length === 0) {
-    await interaction.reply("해당 페이지에 대한 순위 정보가 없습니다.");
+    await interaction.reply({
+      content: "해당 페이지에 대한 순위 정보가 없습니다.",
+      flags: MessageFlags.Ephemeral,
+    });
     return;
   }
 
@@ -95,25 +98,34 @@ async function executeTransfer(interaction: any) {
   const amount = interaction.options.getInteger("금액");
 
   if (recipient.id === senderId) {
-    await interaction.reply("자기 자신에게는 송금할 수 없습니다.");
+    await interaction.reply({
+      content: "자기 자신에게는 송금할 수 없습니다.",
+      flags: MessageFlags.Ephemeral,
+    });
     return;
   }
 
   if (amount <= 0) {
-    await interaction.reply(`송금할 금액은 ${formatMoney(0)}보다 커야 합니다.`);
+    await interaction.reply({
+      content: `송금할 금액은 ${formatMoney(0)}보다 커야 합니다.`,
+      flags: MessageFlags.Ephemeral,
+    });
     return;
   }
 
   const senderBalance = await getBalance(senderId);
   if (senderBalance < amount) {
-    await interaction.reply("잔액이 부족합니다.");
+    await interaction.reply({
+      content: "잔액이 부족합니다.",
+      flags: MessageFlags.Ephemeral,
+    });
     return;
   }
 
   await transferBalance(senderId, recipient.id, amount);
 
   await interaction.reply(
-    `성공적으로 **${formatMoney(amount)}**를 \`${recipient.username}\`님께 송금했습니다.`,
+    `<@${recipient.id}>님에게 **${formatMoney(amount)}**를 송금했습니다.`,
   );
 }
 
