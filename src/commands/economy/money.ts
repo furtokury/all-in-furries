@@ -121,7 +121,9 @@ async function executeCheck(interaction: any) {
   const user = interaction.options.getUser("유저") || interaction.user;
   const userId = user.id;
   const balance = await getBalance(userId);
+  const displayName =
+    interaction.guild.members.cache.get(userId)?.displayName || user.username;
   await interaction.reply(
-    `당신의 현재 잔액은 **${formatMoney(balance)}**입니다.`,
+    `${displayName}님의 현재 잔액은 **${formatMoney(balance)}**입니다.`,
   );
 }
