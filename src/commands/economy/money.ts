@@ -81,11 +81,9 @@ async function executeLeaderboard(interaction: any) {
     const entry = leaderboard[i];
     if (!entry) continue;
 
-    console.log(entry);
+    const user = await interaction.client.users.fetch(entry.id);
     const nickname =
-      interaction.guild.members.cache.get(entry.id)?.displayName ||
-      interaction.guild.members.cache.get(entry.id)?.nickname ||
-      "알 수 없음";
+      user?.displayName || user?.nickname || user?.username || "알 수 없음";
     replyMessage += `- **${offset + i + 1}위**. ${nickname}: ${formatMoney(entry.balance)}\n`;
   }
 
