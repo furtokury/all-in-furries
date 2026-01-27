@@ -113,6 +113,6 @@ export async function handleNewMessage(message: Message) {
   }
 
   const channel = message.channel as TextChannel;
-  const pinnedMessage = await channel.send(pinMessageContent);
+  const pinnedMessage = await channel.send(pinMessageContent + " @silent");
   pinnedMessageByChannel[channelId] = pinnedMessage;
 }
