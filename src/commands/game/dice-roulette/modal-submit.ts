@@ -132,6 +132,12 @@ export default async function (interaction: any): Promise<void> {
     `# 🎲 주사위 결과: ${dice[0]} + ${dice[1]} = __${dice[0]! + dice[1]!}__`,
   );
 
+  const areas = Object.entries(ROULETTE_MAP)
+    .filter(([_, info]) => info.dice.includes(dice[0]! + dice[1]!))
+    .map(([position, _]) => position.toUpperCase())
+    .join(", ");
+  messages.push(`적중 구역: ${areas}`);
+
   for (let i = 0; i < parsedBettings.length; i++) {
     const betting = parsedBettings[i]!;
     const rouletteInfo = ROULETTE_MAP[betting.position];
