@@ -34,6 +34,8 @@ GUILD_ID=<디스코드 길드 ID>
   - 투자종목
     - 한강물 온도
     - 서버 활동량
+      - 개인별 통화시간
+      - 개인별 채팅량
       - FURALL - 통화량 지수
       - FURAT - 채팅량 지수
       - FURUME - 통화량(currency volume) 지수
