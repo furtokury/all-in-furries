@@ -8,7 +8,9 @@ const BALANCES_FILE = "./data/balances.json";
 
 export function formatMoney(amount: number): string {
   return (
-    amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+    Math.round(amount)
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
     " " +
     CURRENCY_SYMBOL
   );
