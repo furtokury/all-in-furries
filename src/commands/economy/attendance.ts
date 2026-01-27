@@ -85,7 +85,9 @@ async function executeCheck(interaction: any) {
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) {
-    await interaction.reply("오늘 이미 출석체크를 하셨습니다.");
+    await interaction.reply(
+      "오늘 이미 출석체크를 하셨습니다. 출석체크는 09:00 KST를 기준으로 하루에 한 번만 가능합니다.",
+    );
     return;
   } else if (diffDays === 1) {
     attendanceInfo.streak += 1;
