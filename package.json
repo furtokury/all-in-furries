@@ -13,6 +13,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "canvas": "^3.2.1",
     "discord.js": "^14.25.1",
     "es-hangul": "^2.3.8"
   }
