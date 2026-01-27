@@ -8,10 +8,8 @@ import {
 import { formatMoney, getBalance } from "../../../util/money";
 
 export function createComponentCollector(interaction: any, message: Message) {
-  const collectorFilter = (i: any) =>
-    i.customId === "dice-roulette-ready" && i.user.id === interaction.user.id;
   const collector = message.createMessageComponentCollector({
-    filter: collectorFilter,
+    filter: (i: any) => i.customId === "dice-roulette-ready",
     time: 60_000,
   });
 
