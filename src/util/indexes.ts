@@ -26,7 +26,7 @@ export const INDEXES: { name: string; description: string }[] = [
   {
     name: "FUROM",
     description:
-      "랜덤 이벤트에 투자합니다. (`𝛥 = 현재값 * exp(random[-0.01, 0.01])`, 1000에서 시작, 모든 이벤트에 적용)",
+      "랜덤 이벤트에 투자합니다. (`𝛥 = 현재값 * exp(random[-0.1, 0.1])`, 1000에서 시작, 모든 이벤트에 적용)",
   },
 ];
 
@@ -268,7 +268,7 @@ async function saveIndexBalance(balances: IndexBalance[]) {
 
 export async function updateFUROM() {
   const furomIndex = (await getIndexValue("FUROM")) || 1000;
-  updateIndex("FUROM", furomIndex * Math.exp(Math.random() * 0.02 - 0.01));
+  updateIndex("FUROM", furomIndex * Math.exp(Math.random() * 0.2 - 0.1));
 }
 
 let lastMessageTimestamp = 0;
