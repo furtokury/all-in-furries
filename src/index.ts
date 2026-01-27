@@ -1,18 +1,15 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { commands } from "./deploy-commands.js";
 import diceRouletteModalSubmit from "./commands/game/dice-roulette/modal-submit";
-import {
-  getIndexValue,
-  updateFURALL,
-  updateFURAT,
-  updateFUROM,
-} from "./util/indexes.js";
+import { updateFURALL, updateFURAT, updateFUROM } from "./util/indexes.js";
+import { handleNewMessage } from "./features/pin.js";
 
 export const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
   ],
 });
 
@@ -87,6 +84,8 @@ client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
   updateFURAT();
+
+  await handleNewMessage(message);
 });
 
 client.login(process.env.BOT_TOKEN!);
