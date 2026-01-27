@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs/promises";
 
 export const CURRENCY_SYMBOL = "₣";
-export const CURRENCY_NAME = "퍼";
+export const CURRENCY_NAME = "프랑";
 
 const BALANCES_FILE = "./data/balances.json";
 

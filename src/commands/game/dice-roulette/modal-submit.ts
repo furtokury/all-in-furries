@@ -116,6 +116,8 @@ export default async function (interaction: any): Promise<void> {
   const messages = [];
   let win = 0;
 
+  messages.push(`<@${interaction.user.id}> 님의 🎲 주사위 룰렛 결과입니다!\n`);
+
   messages.push(`## 📋 베팅 목록`);
 
   for (let i = 0; i < parsedBettings.length; i++) {
@@ -151,7 +153,7 @@ export default async function (interaction: any): Promise<void> {
     const hit = rouletteInfo.dice.includes(dice[0]! + dice[1]!);
     if (hit) {
       const winAmount = Math.floor(
-        betting.amount * (rouletteInfo.multiplication - 1),
+        betting.amount * rouletteInfo.multiplication,
       );
       messages.push(
         `- 베팅 위치 "${betting.position.toUpperCase()}"이(가) 적중했습니다! ✅ +${formatMoney(winAmount)}`,
@@ -167,7 +169,7 @@ export default async function (interaction: any): Promise<void> {
   const afterAmount = balance - totalBetAmount + win;
   messages.push(`### ✅ 최종 결과`);
   messages.push(`- 초기 소지금: ${formatMoney(balance)}`);
-  messages.push(`- 베팅 금액: -${formatMoney(totalBetAmount)}`);
+  messages.push(`- 베팅 금액: ${formatMoney(totalBetAmount)}`);
   messages.push(`- 획득 금액: ${formatMoney(win)}`);
   messages.push(`- 변동 금액: **${formatMoney(win - totalBetAmount)}**`);
   messages.push(`- 최종 소지금: ${formatMoney(afterAmount)}`);

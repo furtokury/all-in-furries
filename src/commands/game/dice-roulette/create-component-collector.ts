@@ -5,9 +5,8 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
-import { formatMoney, getBalance } from "../../../util/money";
 
-export function createComponentCollector(interaction: any, message: Message) {
+export function createComponentCollector(_interaction: any, message: Message) {
   const collector = message.createMessageComponentCollector({
     filter: (i: any) => i.customId === "dice-roulette-ready",
     time: 60_000,
@@ -18,8 +17,6 @@ export function createComponentCollector(interaction: any, message: Message) {
       .setCustomId("dice-roulette-modal")
       .setTitle("주사위 룰렛 베팅");
 
-    const balance = await getBalance(interaction.user.id);
-
     const bettingsInput = new TextInputBuilder()
       .setCustomId("dice-roulette-bettings")
       .setStyle(TextInputStyle.Paragraph)
@@ -29,8 +26,7 @@ export function createComponentCollector(interaction: any, message: Message) {
     const instructionLabel = new LabelBuilder()
       .setLabel(`띄워놓은 사진을 참고하여 베팅 내용을 입력해주세요.`)
       .setDescription(
-        `한번에 여러 곳에 베팅할 수 있고, 각 베팅은 줄바꿈으로 구분합니다.\n` +
-          `현재 소지금은 ${formatMoney(balance)}입니다.`,
+        `한번에 여러 곳에 베팅할 수 있고, 각 베팅은 줄바꿈으로 구분합니다.`,
       )
       .setTextInputComponent(bettingsInput);
 
