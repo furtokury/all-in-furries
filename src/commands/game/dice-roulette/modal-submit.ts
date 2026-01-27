@@ -168,7 +168,8 @@ export default async function (interaction: any): Promise<void> {
   messages.push(`### ✅ 최종 결과`);
   messages.push(`- 초기 소지금: ${formatMoney(balance)}`);
   messages.push(`- 베팅 금액: -${formatMoney(totalBetAmount)}`);
-  messages.push(`- 획득 금액: **${formatMoney(win)}**`);
+  messages.push(`- 획득 금액: ${formatMoney(win)}`);
+  messages.push(`- 변동 금액: **${formatMoney(win - totalBetAmount)}**`);
   messages.push(`- 최종 소지금: ${formatMoney(afterAmount)}`);
 
   setBalance(interaction.user.id, afterAmount);
