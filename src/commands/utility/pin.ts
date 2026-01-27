@@ -20,6 +20,14 @@ export const data = new SlashCommandBuilder()
   .setDescription("메시지를 고정합니다.");
 
 export async function execute(interaction: any) {
+  if (!interaction.member.permissions.has("Administrator")) {
+    await interaction.reply({
+      content: "이 명령어를 사용할 권한이 없습니다.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
   if (interaction.options.getSubcommand() === "고정") {
     await executePin(interaction);
   } else if (interaction.options.getSubcommand() === "해제") {
