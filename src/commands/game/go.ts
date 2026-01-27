@@ -57,6 +57,23 @@ export const data = new SlashCommandBuilder()
       )
       .setDescription("바둑판을 이미지로 봅니다."),
   )
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName("들어내기")
+      .addNumberOption((option) =>
+        option
+          .setName("번호")
+          .setDescription("바둑판의 번호")
+          .setRequired(true),
+      )
+      .addStringOption((option) =>
+        option
+          .setName("위치")
+          .setDescription("제거할 바둑돌의 위치 (예: A1, b2, 3C, 4d)")
+          .setRequired(true),
+      )
+      .setDescription("바둑판에서 인접한 돌들을 제거합니다."),
+  )
   .setDescription("바둑판을 그립니다.");
 
 export async function execute(interaction: any) {
@@ -68,6 +85,8 @@ export async function execute(interaction: any) {
     await executePut(interaction);
   } else if (subcommand === "초기화") {
     await executeReset(interaction);
+  } else if (subcommand === "들어내기") {
+    await executeRemove(interaction);
   }
 }
 
@@ -135,6 +154,91 @@ async function executeReset(interaction: any) {
 
   await resetBoard(id);
   await interaction.reply(`바둑판 #${id}이 초기화되었습니다.`);
+}
+
+async function executeRemove(interaction: any) {
+  const id = interaction.options.getNumber("번호") ?? 0;
+  const position = interaction.options.getString("위치") ?? "A1";
+
+  const match = position
+    .toUpperCase()
+    .match(/^([A-S])([1-9]|1[0-9])$|^([1-9]|1[0-9])([A-S])$/);
+  if (!match) {
+    await interaction.reply({
+      content: "잘못된 위치 형식입니다. 예: A1, b2, 3C, 4d",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+  const colStr = match[1] || match[4];
+  const rowStr = match[2] || match[3];
+
+  const x = COLUMN_LABELS.indexOf(colStr!);
+  const y = 19 - parseInt(rowStr!);
+
+  if (x < 0 || x >= 19 || y < 0 || y >= 19) {
+    await interaction.reply({
+      content: "위치가 바둑판 범위를 벗어났습니다.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  // dfs to remove stones
+  const board = await getGoBoardById(id);
+  const stones = board.stones;
+  const targetStone = stones.find((stone) => stone.x === x && stone.y === y);
+  if (!targetStone) {
+    await interaction.reply({
+      content: "해당 위치에 바둑돌이 없습니다.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+  const targetColor = targetStone.color;
+
+  const toRemove: GoStone[] = [];
+  const visited = new Set<string>();
+  const stack: [number, number][] = [[x, y]];
+
+  while (stack.length > 0) {
+    const [cx, cy] = stack.pop()!;
+    const key = `${cx},${cy}`;
+    if (visited.has(key)) continue;
+    visited.add(key);
+
+    const stone = stones.find((s) => s.x === cx && s.y === cy);
+    if (stone && stone.color === targetColor) {
+      toRemove.push(stone);
+      // check neighbors
+      const neighbors = [
+        [cx + 1, cy],
+        [cx - 1, cy],
+        [cx, cy + 1],
+        [cx, cy - 1],
+      ];
+      for (const [nx, ny] of neighbors) {
+        if (!nx || !ny) continue;
+        if (nx >= 0 && nx < 19 && ny >= 0 && ny < 19) {
+          stack.push([nx, ny]);
+        }
+      }
+    }
+  }
+
+  // remove stones
+  for (const stone of toRemove) {
+    const index = stones.indexOf(stone);
+    if (index !== -1) {
+      stones.splice(index, 1);
+    }
+  }
+
+  createImage(stones);
+  await interaction.reply({
+    content: `바둑판 #${id}에서 ${toRemove.length}개의 돌을 제거했습니다.`,
+    files: ["./data/go_board.jpeg"],
+  });
 }
 
 const SIZE = 2048;
