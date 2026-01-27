@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import type { Message, TextChannel } from "discord.js";
+import { MessageFlags, type Message, type TextChannel } from "discord.js";
 
 let pinMessageContentCache:
   | {
@@ -113,6 +113,9 @@ export async function handleNewMessage(message: Message) {
   }
 
   const channel = message.channel as TextChannel;
-  const pinnedMessage = await channel.send(pinMessageContent + " @silent");
+  const pinnedMessage = await channel.send({
+    content: pinMessageContent,
+    flags: MessageFlags.SuppressNotifications,
+  });
   pinnedMessageByChannel[channelId] = pinnedMessage;
 }
