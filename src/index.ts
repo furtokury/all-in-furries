@@ -1,7 +1,12 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { commands } from "./deploy-commands.js";
 import diceRouletteModalSubmit from "./commands/game/dice-roulette/modal-submit";
-import { getIndexValue, updateIndex } from "./util/indexes.js";
+import {
+  getIndexValue,
+  updateFURALL,
+  updateFURAT,
+  updateFUROM,
+} from "./util/indexes.js";
 
 export const client = new Client({
   intents: [
@@ -48,19 +53,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 
-  // update FURAT
-  if (lastMessageTimestamp !== 0) {
-    const now = Date.now();
-    const diffMinutes = (now - lastMessageTimestamp) / 1000 / 60;
-
-    updateIndex("FURAT", 1000 / Math.log(diffMinutes + 2));
-  }
-
-  // update FUROM
-  const furomIndex = (await getIndexValue("FUROM")) || 1000;
-  updateIndex("FUROM", furomIndex * Math.exp(Math.random() * 0.02 - 0.01));
-
-  lastMessageTimestamp = Date.now();
+  updateFURAT();
+  updateFUROM();
 });
 
 client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
@@ -85,42 +79,14 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
   }
 
   // get count of all members in the guild's voice channels
-  const guild = newState.guild;
-  if (!guild) return;
-  const voiceChannels = guild.channels.cache.filter(
-    (channel) => channel.isVoiceBased() && channel.members.size > 0,
-  );
-  let totalCount = 0;
-  voiceChannels.forEach((channel) => {
-    if (!channel.isVoiceBased()) return;
-    totalCount += channel.members.size;
-  });
-
-  updateIndex("FURALL", 1000 * Math.sqrt(totalCount + 1));
-
-  // update FUROM
-  const furomIndex = (await getIndexValue("FUROM")) || 1000;
-  updateIndex("FUROM", furomIndex * Math.exp(Math.random() * 0.02 - 0.01));
+  updateFURALL(newState.guild);
+  updateFUROM();
 });
-
-let lastMessageTimestamp = 0;
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
-  // update FURAT
-  if (lastMessageTimestamp !== 0) {
-    const now = Date.now();
-    const diffMinutes = (now - lastMessageTimestamp) / 1000 / 60;
-
-    updateIndex("FURAT", 1000 / Math.log(diffMinutes + 2));
-  }
-
-  // update FUROM
-  const furomIndex = (await getIndexValue("FUROM")) || 1000;
-  updateIndex("FUROM", furomIndex * Math.exp(Math.random() * 0.02 - 0.01));
-
-  lastMessageTimestamp = Date.now();
+  updateFURAT();
 });
 
 client.login(process.env.BOT_TOKEN!);

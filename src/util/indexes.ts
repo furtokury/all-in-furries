@@ -1,3 +1,4 @@
+import type { Guild } from "discord.js";
 import fs from "fs/promises";
 
 type IndexData = {
@@ -171,10 +172,10 @@ export async function getIndexes(): Promise<Index[]> {
 
 let saveIndexCooldown = 50;
 let saveIndexCooldownCounter = 0;
-export async function saveIndexes(indexes: Index[]) {
+export async function saveIndexes(indexes: Index[], force: boolean = false) {
   indexesCache = indexes;
 
-  if (saveIndexCooldownCounter < saveIndexCooldown) {
+  if (saveIndexCooldownCounter < saveIndexCooldown && !force) {
     saveIndexCooldownCounter++;
     return;
   }
@@ -263,4 +264,38 @@ async function saveIndexBalance(balances: IndexBalance[]) {
     JSON.stringify(balances, null, 2),
     "utf-8",
   );
+}
+
+export async function updateFUROM() {
+  const furomIndex = (await getIndexValue("FUROM")) || 1000;
+  updateIndex("FUROM", furomIndex * Math.exp(Math.random() * 0.02 - 0.01));
+}
+
+let lastMessageTimestamp = 0;
+export async function updateFURAT() {
+  if (lastMessageTimestamp !== 0) {
+    const now = Date.now();
+    const diffMinutes = (now - lastMessageTimestamp) / 1000 / 60;
+
+    updateIndex("FURAT", 1000 / Math.log(diffMinutes + 2));
+  }
+
+  lastMessageTimestamp = Date.now();
+}
+
+export async function updateFURALL(guild: Guild) {
+  const voiceChannels = guild.channels.cache.filter(
+    (channel) => channel.isVoiceBased() && channel.members.size > 0,
+  );
+  let totalCount = 0;
+  voiceChannels.forEach((channel) => {
+    if (!channel.isVoiceBased()) return;
+    totalCount += channel.members.size;
+  });
+
+  updateIndex("FURALL", 1000 * Math.sqrt(totalCount + 1));
+}
+
+export async function updateIndexes(guild: Guild) {
+  await Promise.all([updateFURAT(), updateFUROM(), updateFURALL(guild)]);
 }

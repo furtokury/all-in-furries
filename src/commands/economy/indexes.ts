@@ -4,7 +4,9 @@ import {
   getIndexBalance,
   getIndexValue,
   getIndexes,
+  saveIndexes,
   setIndexBalance,
+  updateIndexes,
 } from "../../util/indexes";
 import { formatMoney, getBalance, setBalance } from "../../util/money";
 
@@ -52,11 +54,18 @@ export const data = new SlashCommandBuilder()
   )
   .addSubcommand((subcommand) =>
     subcommand
+      .setName("저장")
+      .setDescription("현재 투자 현황을 파일로 저장합니다."),
+  )
+  .addSubcommand((subcommand) =>
+    subcommand
       .setName("목록")
       .setDescription("구매 가능한 투자 상품 목록을 확인합니다."),
   );
 
 export async function execute(interaction: any) {
+  await updateIndexes(interaction.guild);
+
   const subcommand = interaction.options.getSubcommand();
 
   switch (subcommand) {
@@ -71,6 +80,9 @@ export async function execute(interaction: any) {
       break;
     case "목록":
       await executeList(interaction);
+      break;
+    case "저장":
+      await executeSave(interaction);
       break;
     default:
       await interaction.reply("알 수 없는 명령어입니다.");
@@ -260,4 +272,8 @@ async function executeList(interaction: any) {
   await interaction.reply(
     `구매 가능한 투자 상품 목록입니다:\n${descriptions.join("\n")}`,
   );
+}
+
+async function executeSave(interaction: any) {
+  await saveIndexes(await getIndexes(), true);
 }
