@@ -276,4 +276,5 @@ async function executeList(interaction: any) {
 
 async function executeSave(interaction: any) {
   await saveIndexes(await getIndexes(), true);
+  await interaction.reply("현재 투자 현황을 파일로 저장했습니다.");
 }

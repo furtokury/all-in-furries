@@ -43,7 +43,7 @@ function initIndexData(name: string, initialValue: number): IndexData {
     min: initialValue,
     max: initialValue,
     from: initialValue,
-    startedAt: null,
+    startedAt: new Date().toISOString(),
     endedAt: null,
   };
 }
