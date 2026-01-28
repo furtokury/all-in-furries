@@ -92,7 +92,7 @@ export async function getTotalMoneyInCirculation(): Promise<number> {
   const data = await fs.readFile(BALANCES_FILE, "utf-8");
   const balances = JSON.parse(data);
 
-  let balanceSum = Object.values(balances).reduce(
+  const balanceSum = Object.values(balances).reduce(
     (sum, balance) => (sum as number) + (balance as number),
     0,
   ) as number;

@@ -168,7 +168,7 @@ async function executeSell(interaction: any) {
     return;
   }
 
-  let indexBalanceData = await getIndexBalance(userId);
+  const indexBalanceData = await getIndexBalance(userId);
   if (!indexBalanceData) {
     await interaction.editReply({
       content: "현재 보유한 투자 상품이 없습니다.",

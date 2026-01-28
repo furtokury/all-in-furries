@@ -4,10 +4,16 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "lint": "bunx eslint . --ext .ts",
     "start": "bun run --env-file=.env src/index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "eslint": "^9.39.2",
+    "jiti": "^2.6.1",
+    "typescript-eslint": "^8.54.0"
   },
   "peerDependencies": {
     "typescript": "^5"

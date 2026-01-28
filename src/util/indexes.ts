@@ -3,7 +3,6 @@ import fs from "fs/promises";
 import { getTotalMoneyInCirculation } from "./money";
 
 type IndexData = {
-  name: string;
   value: number;
   min: number;
   max: number;
@@ -39,7 +38,6 @@ const INDEX_FILE = "./data/indexes.json";
 
 function initIndexData(name: string, initialValue: number): IndexData {
   return {
-    name,
     value: initialValue,
     min: initialValue,
     max: initialValue,
@@ -178,7 +176,7 @@ export async function getIndexes(): Promise<Index[]> {
   return data;
 }
 
-let saveIndexCooldown = 50;
+const saveIndexCooldown = 50;
 let saveIndexCooldownCounter = 0;
 export async function saveIndexes(indexes: Index[], force: boolean = false) {
   indexesCache = indexes;

@@ -34,7 +34,7 @@ export async function execute(interaction: any) {
     return;
   }
 
-  let rolls = [];
+  const rolls = [];
   for (let i = 0; i < numDice; i++) {
     rolls.push(Math.floor(Math.random() * numSides) + 1);
   }
