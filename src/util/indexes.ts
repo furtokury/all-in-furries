@@ -54,6 +54,9 @@ function cutIndexData(indexData: IndexData, at: Date): IndexData {
 
   return {
     ...indexData,
+    min: indexData.value,
+    max: indexData.value,
+    value: indexData.value,
     from: indexData.value,
     startedAt: at.toISOString(),
     endedAt: null,
