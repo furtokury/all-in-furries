@@ -4,6 +4,7 @@ import {
   getIndexBalances,
   getIndexes,
   getIndexValue,
+  updateFUREY,
   updateIndex,
 } from "./indexes";
 
@@ -51,8 +52,7 @@ export async function setBalance(id: string, amount: number): Promise<void> {
   balances[`${id}`] = amount;
   await fs.writeFile(BALANCES_FILE, JSON.stringify(balances, null, 2));
 
-  const totalCirculation = await getTotalMoneyInCirculation();
-  updateIndex("FUREY", Math.log(totalCirculation + 1) * 300);
+  updateFUREY();
 }
 
 export async function transferBalance(
@@ -86,7 +86,7 @@ export async function getLeaderboard(
   return sortedBalances.slice(offset, offset + limit);
 }
 
-async function getTotalMoneyInCirculation(): Promise<number> {
+export async function getTotalMoneyInCirculation(): Promise<number> {
   // balances
   await ensureDataFileExists();
   const data = await fs.readFile(BALANCES_FILE, "utf-8");

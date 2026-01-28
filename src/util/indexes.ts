@@ -1,5 +1,6 @@
 import type { Guild } from "discord.js";
 import fs from "fs/promises";
+import { getTotalMoneyInCirculation } from "./money";
 
 type IndexData = {
   name: string;
@@ -300,6 +301,16 @@ export async function updateFURALL(guild: Guild) {
   updateIndex("FURALL", 1000 * Math.sqrt(totalCount + 1));
 }
 
+export async function updateFUREY() {
+  const totalCirculation = await getTotalMoneyInCirculation();
+  updateIndex("FUREY", Math.log(totalCirculation + 1) * 300);
+}
+
 export async function updateIndexes(guild: Guild) {
-  await Promise.all([updateFURAT(), updateFUROM(), updateFURALL(guild)]);
+  await Promise.all([
+    updateFURAT(),
+    updateFUROM(),
+    updateFURALL(guild),
+    updateFUREY(),
+  ]);
 }
