@@ -1,5 +1,11 @@
 import path from "path";
 import fs from "fs/promises";
+import {
+  getIndexBalances,
+  getIndexes,
+  getIndexValue,
+  updateIndex,
+} from "./indexes";
 
 export const CURRENCY_SYMBOL = "₣";
 export const CURRENCY_NAME = "프랑";
@@ -44,6 +50,9 @@ export async function setBalance(id: string, amount: number): Promise<void> {
   const balances = JSON.parse(data);
   balances[`${id}`] = amount;
   await fs.writeFile(BALANCES_FILE, JSON.stringify(balances, null, 2));
+
+  const totalCirculation = await getTotalMoneyInCirculation();
+  updateIndex("FUREY", Math.log(totalCirculation + 1) * 300);
 }
 
 export async function transferBalance(
@@ -75,4 +84,33 @@ export async function getLeaderboard(
     .sort((a, b) => b.balance - a.balance);
 
   return sortedBalances.slice(offset, offset + limit);
+}
+
+async function getTotalMoneyInCirculation(): Promise<number> {
+  // balances
+  await ensureDataFileExists();
+  const data = await fs.readFile(BALANCES_FILE, "utf-8");
+  const balances = JSON.parse(data);
+
+  let balanceSum = Object.values(balances).reduce(
+    (sum, balance) => (sum as number) + (balance as number),
+    0,
+  ) as number;
+
+  // indexes
+  const indexes = await getIndexes();
+  const indexBalances = await getIndexBalances();
+
+  let indexSum = 0;
+  for (const indexBalance of indexBalances) {
+    for (const balance of indexBalance.balances) {
+      const index = indexes.find((idx) => idx.name === balance.name);
+      if (index) {
+        const indexValue = await getIndexValue(index.name);
+        indexSum += indexValue ? balance.count * indexValue : 0;
+      }
+    }
+  }
+
+  return balanceSum + indexSum;
 }

@@ -28,6 +28,10 @@ export const INDEXES: { name: string; description: string }[] = [
     description:
       "랜덤 이벤트에 투자합니다. (`𝛥 = 현재값 * exp(random[-0.1, 0.1])`, 1000에서 시작, 모든 이벤트에 적용)",
   },
+  {
+    name: "FUREY",
+    description: "전체 통화 발행량에 투자합니다. (`log(발행량 + 1) * 300`)",
+  },
 ];
 
 const INDEX_FILE = "./data/indexes.json";
