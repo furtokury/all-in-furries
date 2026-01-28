@@ -64,6 +64,10 @@ export const data = new SlashCommandBuilder()
   );
 
 export async function execute(interaction: any) {
+  // defer
+  await interaction.deferReply();
+
+  // Update indexes before executing any subcommand
   await updateIndexes(interaction.guild);
 
   const subcommand = interaction.options.getSubcommand();
@@ -85,7 +89,7 @@ export async function execute(interaction: any) {
       await executeSave(interaction);
       break;
     default:
-      await interaction.reply("알 수 없는 명령어입니다.");
+      await interaction.editReply("알 수 없는 명령어입니다.");
   }
 }
 
@@ -98,7 +102,7 @@ async function executeBuy(interaction: any) {
   const index = await getIndexValue(productName);
 
   if (index === null) {
-    await interaction.reply(
+    await interaction.editReply(
       `**${productName}**: 해당 투자 상품을 찾을 수 없습니다.`,
     );
     return;
@@ -106,7 +110,7 @@ async function executeBuy(interaction: any) {
 
   const price = Math.round(index * quantity);
   if (price > balance) {
-    await interaction.reply(
+    await interaction.editReply(
       `잔액이 부족합니다. 현재 잔액: ${formatMoney(balance)}, 필요한 금액: ${formatMoney(price)}`,
     );
     return;
@@ -119,7 +123,7 @@ async function executeBuy(interaction: any) {
   }
 
   if (!indexBalanceData) {
-    await interaction.reply("투자 잔고 정보를 불러오는 데 실패했습니다.");
+    await interaction.editReply("투자 잔고 정보를 불러오는 데 실패했습니다.");
     return;
   }
 
@@ -142,7 +146,7 @@ async function executeBuy(interaction: any) {
   await setIndexBalance(userId, productName, newCount, boughtAt);
   await setBalance(userId, balance - price);
 
-  await interaction.reply(
+  await interaction.editReply(
     `**${productName}** ${quantity}주를 ${formatMoney(price)}에 구매했습니다.\n` +
       `현재 보유 주: ${newCount}주. ` +
       `평균 매수가: ${boughtAt.toFixed(2)}, ` +
@@ -158,27 +162,24 @@ async function executeSell(interaction: any) {
   const index = await getIndexValue(productName);
 
   if (index === null) {
-    await interaction.reply({
+    await interaction.editReply({
       content: `**${productName}**: 해당 투자 상품을 찾을 수 없습니다.`,
-      flags: MessageFlags.Ephemeral,
     });
     return;
   }
 
   let indexBalanceData = await getIndexBalance(userId);
   if (!indexBalanceData) {
-    await interaction.reply({
+    await interaction.editReply({
       content: "현재 보유한 투자 상품이 없습니다.",
-      flags: MessageFlags.Ephemeral,
     });
     return;
   }
 
   const indexBalance = indexBalanceData.find((b) => b.name === productName);
   if (!indexBalance || indexBalance.count === 0) {
-    await interaction.reply({
+    await interaction.editReply({
       content: `**${productName}**: 보유한 주식이 없습니다.`,
-      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -188,9 +189,8 @@ async function executeSell(interaction: any) {
   }
 
   if (quantity > indexBalance.count) {
-    await interaction.reply({
+    await interaction.editReply({
       content: `보유한 주식 수보다 많은 수량을 판매할 수 없습니다. 현재 보유 주식: ${indexBalance.count}주.`,
-      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -205,7 +205,7 @@ async function executeSell(interaction: any) {
   const balance = await getBalance(userId);
   await setBalance(userId, balance + price);
 
-  await interaction.reply(
+  await interaction.editReply(
     `**${productName}** ${quantity}주를 ${formatMoney(price)}에 판매했습니다.\n` +
       `현재 보유 주: ${newCount}주. ` +
       `남은 잔액: ${formatMoney(balance + price)}`,
@@ -217,7 +217,7 @@ async function executeStatus(interaction: any) {
   const balances = await getIndexBalance(userId);
 
   if (!balances || balances.length === 0) {
-    await interaction.reply("현재 보유한 투자 상품이 없습니다.");
+    await interaction.editReply("현재 보유한 투자 상품이 없습니다.");
     return;
   }
 
@@ -247,7 +247,7 @@ async function executeStatus(interaction: any) {
     }
   }
 
-  await interaction.reply(
+  await interaction.editReply(
     `현재 보유한 투자 상품 현황입니다:\n${descriptions.join("\n")}`,
   );
 }
@@ -269,12 +269,12 @@ async function executeList(interaction: any) {
     descriptions.push(`**${name}**: ${formatMoney(value)}\n- ${description}`);
   }
 
-  await interaction.reply(
+  await interaction.editReply(
     `구매 가능한 투자 상품 목록입니다:\n${descriptions.join("\n")}`,
   );
 }
 
 async function executeSave(interaction: any) {
   await saveIndexes(await getIndexes(), true);
-  await interaction.reply("현재 투자 현황을 파일로 저장했습니다.");
+  await interaction.editReply("현재 투자 현황을 파일로 저장했습니다.");
 }
