@@ -140,7 +140,7 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
             session.time *
             session.time *
             (result.multiplier + 0.002 * (Math.random() - 0.5)),
-        ),
+        ) * 0.1,
       );
 
       if (price > 0) {
