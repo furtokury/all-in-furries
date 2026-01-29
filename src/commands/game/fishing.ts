@@ -6,26 +6,35 @@ import {
   TextChannel,
 } from "discord.js";
 import { formatMoney, getBalance, setBalance } from "../../util/money";
+import { zstdCompress } from "zlib";
 
 export const data = new SlashCommandBuilder()
   .setName("낚시")
-  .addNumberOption((option) =>
-    option
-      .setName("시간")
-      .setDescription(
-        "대기 시간이 길수록 더 좋은 보상을 획득할 확률이 커집니다 (분, 기본값: 5분)",
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName("시작")
+      .addNumberOption((option) =>
+        option
+          .setName("시간")
+          .setDescription(
+            "대기 시간이 길수록 더 좋은 보상을 획득할 확률이 커집니다 (분, 기본값: 5분)",
+          )
+          .setRequired(false)
+          .setMinValue(5)
+          .setMaxValue(600),
       )
-      .setRequired(false)
-      .setMinValue(5)
-      .setMaxValue(600),
+      .addNumberOption((option) =>
+        option
+          .setName("미끼")
+          .setDescription("미끼 가격 (기본값: 100)")
+          .setRequired(false)
+          .setMinValue(100)
+          .setMaxValue(10000),
+      )
+      .setDescription("낚시를 시작합니다."),
   )
-  .addNumberOption((option) =>
-    option
-      .setName("미끼")
-      .setDescription("미끼 가격 (기본값: 100)")
-      .setRequired(false)
-      .setMinValue(100)
-      .setMaxValue(10000),
+  .addSubcommand((subcommand) =>
+    subcommand.setName("올리기").setDescription("던진 낚시줄을 올립니다."),
   )
   .setDescription("낚시를 합니다.");
 
@@ -34,6 +43,7 @@ const currentlyFishing: {
   time: number;
   baitPrice: number;
   channel: TextChannel;
+  timeout: NodeJS.Timeout;
 }[] = [];
 
 const messages = [
@@ -59,7 +69,40 @@ const messages = [
   },
 ];
 
-export async function execute(interaction: any) {
+export async function executeFishing(interaction: any) {
+  const subcommand = interaction.options.getSubcommand();
+
+  if (subcommand === "시작") {
+    await executeThrow(interaction);
+  } else if (subcommand === "올리기") {
+    await executeRaise(interaction);
+  }
+}
+
+async function executeRaise(interaction: any) {
+  const sessionIndex = currentlyFishing.findIndex(
+    (f) => f.userId === interaction.user.id,
+  );
+
+  if (sessionIndex === -1) {
+    await interaction.reply({
+      content: "낚시를 하고 있지 않습니다!",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  clearTimeout(currentlyFishing[sessionIndex]!.timeout);
+
+  currentlyFishing.splice(sessionIndex, 1);
+
+  await interaction.reply({
+    content: "낚시줄을 올렸습니다. 낚시를 중단합니다.",
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+async function executeThrow(interaction: any) {
   const time = interaction.options.getNumber("시간") || 5;
   const baitPrice = interaction.options.getNumber("미끼") || 100;
 
@@ -87,12 +130,14 @@ export async function execute(interaction: any) {
       `메시지에 있는 버튼을 30초 안에 누르면 낚시에 성공합니다.`,
   });
 
+  await setBalance(interaction.user.id, balance - baitPrice);
+
   const button = new ButtonBuilder()
     .setCustomId(`fish_catch_${interaction.user.id}`)
     .setLabel("낚시대 감기")
     .setStyle(ButtonStyle.Primary);
 
-  setTimeout(
+  const timeout = setTimeout(
     async () => notifyFishing(interaction, button),
     Math.floor(Math.random() * time * 60000),
   );
@@ -102,6 +147,7 @@ export async function execute(interaction: any) {
     time,
     baitPrice,
     channel: interaction.channel,
+    timeout,
   });
 }
 
@@ -150,7 +196,10 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
 
       if (price > 0) {
         const currentBalance = await getBalance(interaction.user.id);
-        await setBalance(interaction.user.id, currentBalance + price);
+        await setBalance(
+          interaction.user.id,
+          currentBalance + session.baitPrice + price,
+        );
       }
 
       await i.update({
