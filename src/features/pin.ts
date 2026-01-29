@@ -5,6 +5,7 @@ let pinMessageContentCache:
   | {
       channel: string;
       message: string;
+      every: number;
     }[]
   | null = null;
 
@@ -25,6 +26,7 @@ async function savePinnedMessages(
   pinMessageContents: {
     channel: string;
     message: string;
+    every: number;
   }[],
 ) {
   pinMessageContentCache = pinMessageContents;
@@ -40,6 +42,7 @@ async function savePinnedMessages(
 export async function setPinMessageContent(
   channelId: string,
   messageContent: string,
+  every: number,
 ) {
   const pinMessageContents = await loadPinMessageContents();
   const pinMessageContent = pinMessageContents.find(
@@ -59,7 +62,11 @@ export async function setPinMessageContent(
   if (pinMessageContent) {
     pinMessageContent.message = messageContent;
   } else {
-    pinMessageContents.push({ channel: channelId, message: messageContent });
+    pinMessageContents.push({
+      channel: channelId,
+      message: messageContent,
+      every: every,
+    });
   }
 
   await savePinnedMessages(pinMessageContents);
@@ -69,6 +76,7 @@ export async function loadPinMessageContents(): Promise<
   {
     channel: string;
     message: string;
+    every: number;
   }[]
 > {
   if (pinMessageContentCache) {
@@ -96,7 +104,18 @@ export async function getPinMessageContent(
   return pinnedMessage ? pinnedMessage.message : null;
 }
 
-const pinnedMessageByChannel: Record<string, Message> = {};
+const pinnedMessageInfo: Record<string, { message: Message; counter: number }> =
+  {};
+
+async function getPinMessageContentFrequency(
+  channelId: string,
+): Promise<number> {
+  const pinnedMessage = (await loadPinMessageContents()).find(
+    (pinned) => pinned.channel === channelId,
+  );
+
+  return pinnedMessage ? pinnedMessage.every : 1;
+}
 
 export async function handleNewMessage(message: Message) {
   const channelId = message.channel.id;
@@ -105,7 +124,18 @@ export async function handleNewMessage(message: Message) {
     return;
   }
 
-  const currentPinnedMessage = pinnedMessageByChannel[channelId];
+  const info = pinnedMessageInfo[channelId];
+  if (info) {
+    info.counter += 1;
+    if (info.counter < (await getPinMessageContentFrequency(channelId))) {
+      return;
+    }
+    info.counter = 0;
+  } else {
+    pinnedMessageInfo[channelId] = { message: null as any, counter: 0 };
+  }
+
+  const currentPinnedMessage = pinnedMessageInfo[channelId]!.message;
   if (currentPinnedMessage) {
     try {
       await currentPinnedMessage.delete();
@@ -117,5 +147,5 @@ export async function handleNewMessage(message: Message) {
     content: pinMessageContent,
     flags: MessageFlags.SuppressNotifications,
   });
-  pinnedMessageByChannel[channelId] = pinnedMessage;
+  pinnedMessageInfo[channelId]!.message = pinnedMessage;
 }

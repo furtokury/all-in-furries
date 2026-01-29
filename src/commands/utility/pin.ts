@@ -12,6 +12,12 @@ export const data = new SlashCommandBuilder()
           .setName("messageid")
           .setDescription("고정할 메시지의 ID")
           .setRequired(true),
+      )
+      .addNumberOption((option) =>
+        option
+          .setName("every")
+          .setDescription("몇 메시지마다 고정할지 설정합니다.")
+          .setRequired(false),
       ),
   )
   .addSubcommand((subcommand) =>
@@ -46,7 +52,7 @@ async function executeUnpin(interaction: any) {
 
   const channel = interaction.channel as any;
 
-  await setPinMessageContent(channel.id, "");
+  await setPinMessageContent(channel.id, "", 0);
   await interaction.reply({
     content: "메시지 고정이 성공적으로 해제되었습니다.",
     flags: MessageFlags.Ephemeral,
@@ -55,6 +61,7 @@ async function executeUnpin(interaction: any) {
 
 async function executePin(interaction: any) {
   const messageId = interaction.options.getString("messageid");
+  const every = interaction.options.getNumber("every") || 1;
 
   if (!interaction.channel || !interaction.channel.isTextBased()) {
     await interaction.reply({
@@ -76,7 +83,7 @@ async function executePin(interaction: any) {
     return;
   }
 
-  await setPinMessageContent(interaction.channel.id, message.content);
+  await setPinMessageContent(interaction.channel.id, message.content, every);
   await interaction.reply({
     content: "메시지가 성공적으로 고정되었습니다.",
     flags: MessageFlags.Ephemeral,
