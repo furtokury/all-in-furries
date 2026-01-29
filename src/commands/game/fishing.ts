@@ -113,18 +113,6 @@ async function executeTerminate(interaction: any) {
 }
 
 async function executeStatus(interaction: any) {
-  const session = currentlyFishing.find(
-    (f) => f.userId === interaction.user.id,
-  );
-
-  if (!session) {
-    await interaction.reply({
-      content: "낚시를 하고 있지 않습니다!",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
-
   const messages = [];
   for (const f of currentlyFishing) {
     const user = interaction.guild.members.cache.get(f.userId);
@@ -135,6 +123,10 @@ async function executeStatus(interaction: any) {
         f.baitPrice,
       )}, 최대 대기 시간: ${f.time}분)`,
     );
+  }
+
+  if (messages.length === 0) {
+    messages.push("현재 낚시를 하고 있는 유저가 없습니다.");
   }
 
   await interaction.reply({
