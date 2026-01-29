@@ -110,7 +110,7 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
     (f) => f.userId === interaction.user.id,
   )!;
 
-  await session.channel.send({
+  const response = await session.channel.send({
     content: `<@${interaction.user.id}> 낚시대가 흔들립니다! 버튼을 눌러 낚시대를 감아보세요!`,
     components: [{ type: 1, components: [button] }],
   });
@@ -167,20 +167,19 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
     }
   });
 
-  collector.on("end", async (collected: any) => {
-    if (collected.size === 0) {
-      const balance = await getBalance(interaction.user.id);
-      await setBalance(interaction.user.id, balance - session.baitPrice);
+  collector.on("end", async (_collected: any) => {
+    const balance = await getBalance(interaction.user.id);
+    await setBalance(interaction.user.id, balance - session.baitPrice);
 
-      await interaction.followUp({
-        content:
-          `<@${interaction.user.id}>님이 낚시대 감기에 실패했습니다... ` +
-          `${formatMoney(session.baitPrice)}를 잃었습니다.`,
-      });
-      currentlyFishing.splice(
-        currentlyFishing.findIndex((f) => f.userId === interaction.user.id),
-        1,
-      );
-    }
+    await response.edit({
+      content:
+        `<@${interaction.user.id}>님이 낚시대 감기에 실패했습니다... ` +
+        `${formatMoney(session.baitPrice)}를 잃었습니다.`,
+      components: [],
+    });
+    currentlyFishing.splice(
+      currentlyFishing.findIndex((f) => f.userId === interaction.user.id),
+      1,
+    );
   });
 }
