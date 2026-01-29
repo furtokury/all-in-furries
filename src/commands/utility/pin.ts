@@ -52,7 +52,7 @@ async function executeUnpin(interaction: any) {
 
   const channel = interaction.channel as any;
 
-  await setPinMessageContent(channel.id, "");
+  await setPinMessageContent(channel.id, "", undefined);
   await interaction.reply({
     content: "메시지 고정이 성공적으로 해제되었습니다.",
     flags: MessageFlags.Ephemeral,

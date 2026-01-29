@@ -61,6 +61,7 @@ export async function setPinMessageContent(
 
   if (pinMessageContent) {
     pinMessageContent.message = messageContent;
+    pinMessageContent.every = every ? every : pinMessageContent.every;
   } else {
     pinMessageContents.push({
       channel: channelId,
