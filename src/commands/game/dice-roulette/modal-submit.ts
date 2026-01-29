@@ -108,6 +108,20 @@ export default async function (interaction: any): Promise<void> {
     return;
   }
 
+  if (totalBetAmount < 500) {
+    await interaction.reply({
+      content: `베팅 금액의 총합은 최소 ${formatMoney(500)} 이상이어야 합니다. 다시 시도해주세요.`,
+    });
+    return;
+  }
+
+  if (totalBetAmount > 1_000_000_000) {
+    await interaction.reply({
+      content: `베팅 금액의 총합은 최대 ${formatMoney(1_000_000_000)}까지 가능합니다. 다시 시도해주세요.`,
+    });
+    return;
+  }
+
   const dice = [
     Math.floor(Math.random() * 6) + 1,
     Math.floor(Math.random() * 6) + 1,

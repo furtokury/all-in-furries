@@ -5,6 +5,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
+import { formatMoney } from "../../../util/money";
 
 export function createComponentCollector(_interaction: any, message: Message) {
   const collector = message.createMessageComponentCollector({
@@ -26,7 +27,8 @@ export function createComponentCollector(_interaction: any, message: Message) {
     const instructionLabel = new LabelBuilder()
       .setLabel(`띄워놓은 사진을 참고하여 베팅 내용을 입력해주세요.`)
       .setDescription(
-        `한번에 여러 곳에 베팅할 수 있고, 각 베팅은 줄바꿈으로 구분합니다.`,
+        `한번에 여러 곳에 베팅할 수 있고, 각 베팅은 줄바꿈으로 구분합니다.\n` +
+          `한번에 최소 ${formatMoney(500)}부터 최대 ${formatMoney(1_000_000_000)}까지 베팅할 수 있습니다.`,
       )
       .setTextInputComponent(bettingsInput);
 
