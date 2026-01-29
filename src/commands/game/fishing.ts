@@ -22,7 +22,9 @@ export const data = new SlashCommandBuilder()
     option
       .setName("미끼")
       .setDescription("미끼 가격 (기본값: 10)")
-      .setRequired(false),
+      .setRequired(false)
+      .setMinValue(100)
+      .setMaxValue(10000),
   )
   .setDescription("낚시를 합니다.");
 
@@ -42,12 +44,12 @@ const messages = [
   {
     value: 0.3,
     message: "물고기가 낚였습니다!",
-    multiplier: 0.02,
+    multiplier: 0.002,
   },
   {
     value: 0.8,
     message: "아주 큰 물고기가 낚였습니다!!",
-    multiplier: 0.03,
+    multiplier: 0.003,
   },
 ];
 
@@ -122,7 +124,10 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
       }
 
       const price = Math.floor(
-        baitPrice * time * time * (result.multiplier + Math.random() - 0.5),
+        baitPrice *
+          time *
+          time *
+          ((result.multiplier + 0.001) * (Math.random() - 0.5)),
       );
 
       if (price > 0) {
