@@ -40,8 +40,8 @@ export const data = new SlashCommandBuilder()
   )
   .addSubcommand((subcommand) =>
     subcommand
-      .setName("종료")
-      .setDescription("모든 낚시 세션을 종료합니다. (관리자 전용)"),
+      .setName("중단")
+      .setDescription("모든 낚시 세션을 중단합니다. (관리자 전용)"),
   )
   .setDescription("낚시를 합니다.");
 
@@ -85,26 +85,31 @@ export async function execute(interaction: any) {
     await executeRaise(interaction);
   } else if (subcommand === "현황") {
     await executeStatus(interaction);
-  } else if (subcommand === "종료") {
-    if (!interaction.member.permissions.has("Administrator")) {
-      await interaction.reply({
-        content: "이 명령어를 사용할 권한이 없습니다.",
-        flags: MessageFlags.Ephemeral,
-      });
-      return;
-    }
-
-    for (const session of currentlyFishing) {
-      clearTimeout(session.timeout);
-    }
-    currentlyFishing.splice(0, currentlyFishing.length);
-
-    const mentions = currentlyFishing.map((f) => `<@${f.userId}>`).join(", ");
-
-    await interaction.reply({
-      content: `모든 낚시 세션을 종료했습니다. ${mentions}`,
-    });
+  } else if (subcommand === "중단") {
+    await executeTerminate(interaction);
   }
+}
+
+async function executeTerminate(interaction: any) {
+  if (!interaction.member.permissions.has("Administrator")) {
+    await interaction.reply({
+      content: "이 명령어를 사용할 권한이 없습니다.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  for (const session of currentlyFishing) {
+    clearTimeout(session.timeout);
+  }
+
+  const mentions = currentlyFishing.map((f) => `<@${f.userId}>`).join(", ");
+
+  currentlyFishing.splice(0, currentlyFishing.length);
+
+  await interaction.reply({
+    content: `모든 낚시 세션을 중단했습니다. ${mentions}`,
+  });
 }
 
 async function executeStatus(interaction: any) {
