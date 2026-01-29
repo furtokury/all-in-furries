@@ -21,7 +21,7 @@ export const data = new SlashCommandBuilder()
   .addNumberOption((option) =>
     option
       .setName("미끼")
-      .setDescription("미끼 가격 (기본값: 10)")
+      .setDescription("미끼 가격")
       .setRequired(false)
       .setMinValue(100)
       .setMaxValue(10000),
