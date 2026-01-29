@@ -127,7 +127,7 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
           baitPrice *
             time *
             time *
-            ((result.multiplier + 0.002) * (Math.random() - 0.5)),
+            (result.multiplier + 0.002 * (Math.random() - 0.5)),
         ),
       );
 
