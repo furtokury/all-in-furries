@@ -16,7 +16,7 @@ export const data = new SlashCommandBuilder()
         "대기 시간이 길수록 더 좋은 보상을 획득할 확률이 커집니다 (분, 기본값: 5분)",
       )
       .setRequired(false)
-      .setMinValue(5)
+      .setMinValue(1)
       .setMaxValue(600),
   )
   .addNumberOption((option) =>
@@ -125,6 +125,11 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
       i.customId === `fish_catch_${interaction.user.id}` &&
       i.user.id === interaction.user.id
     ) {
+      currentlyFishing.splice(
+        currentlyFishing.findIndex((f) => f.userId === interaction.user.id),
+        1,
+      );
+
       const rand = Math.random();
       let result = messages[0]!;
       for (const message of messages) {
@@ -160,10 +165,6 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
       });
 
       collector.stop();
-      currentlyFishing.splice(
-        currentlyFishing.findIndex((f) => f.userId === interaction.user.id),
-        1,
-      );
     }
   });
 
@@ -182,6 +183,7 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
         `${formatMoney(session.baitPrice)}를 잃었습니다.`,
       components: [],
     });
+
     currentlyFishing.splice(
       currentlyFishing.findIndex((f) => f.userId === interaction.user.id),
       1,
