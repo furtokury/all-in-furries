@@ -74,8 +74,6 @@ export async function execute(interaction: any) {
     return;
   }
 
-  await setBalance(interaction.user.id, balance - baitPrice);
-
   await interaction.reply({
     content:
       `낚시를 시작합니다! 최대 대기 시간: ${time}분\n` +
@@ -123,11 +121,11 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
         }
       }
 
-      const price = Math.floor(
+      const price = Math.round(
         baitPrice *
           time *
           time *
-          ((result.multiplier + 0.001) * (Math.random() - 0.5)),
+          ((result.multiplier + 0.002) * (Math.random() - 0.5)),
       );
 
       if (price > 0) {
@@ -142,7 +140,7 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
             ? `축하합니다! ${formatMoney(price)}를 획득했습니다!`
             : price < 0
               ? `아쉽게도 ${formatMoney(-price)}를 잃었습니다...`
-              : ""),
+              : "하지만 소지금에는 아무런 변화가 없습니다."),
         components: [],
       });
 
