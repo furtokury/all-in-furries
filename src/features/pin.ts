@@ -65,7 +65,7 @@ export async function setPinMessageContent(
     pinMessageContents.push({
       channel: channelId,
       message: messageContent,
-      every: pinMessageContent ? pinMessageContent.every : every || 1,
+      every: every ? every : pinMessageContent ? pinMessageContent.every : 1,
     });
   }
 
