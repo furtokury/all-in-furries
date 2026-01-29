@@ -168,6 +168,11 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
   });
 
   collector.on("end", async (_collected: any) => {
+    if (
+      currentlyFishing.findIndex((f) => f.userId === interaction.user.id) === -1
+    )
+      return;
+
     const balance = await getBalance(interaction.user.id);
     await setBalance(interaction.user.id, balance - session.baitPrice);
 
