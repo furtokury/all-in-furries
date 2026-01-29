@@ -21,7 +21,7 @@ export const data = new SlashCommandBuilder()
   .addNumberOption((option) =>
     option
       .setName("미끼")
-      .setDescription("미끼 가격")
+      .setDescription("미끼 가격 (기본값: 100)")
       .setRequired(false)
       .setMinValue(100)
       .setMaxValue(10000),
@@ -55,7 +55,7 @@ const messages = [
 
 export async function execute(interaction: any) {
   const time = interaction.options.getNumber("시간") || 5;
-  const baitPrice = interaction.options.getNumber("미끼") || 10;
+  const baitPrice = interaction.options.getNumber("미끼") || 100;
 
   const balance = await getBalance(interaction.user.id);
   if (balance < baitPrice) {
