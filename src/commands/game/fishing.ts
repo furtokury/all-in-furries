@@ -121,11 +121,14 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
         }
       }
 
-      const price = Math.round(
-        baitPrice *
-          time *
-          time *
-          ((result.multiplier + 0.002) * (Math.random() - 0.5)),
+      const price = Math.max(
+        -baitPrice,
+        Math.round(
+          baitPrice *
+            time *
+            time *
+            ((result.multiplier + 0.002) * (Math.random() - 0.5)),
+        ),
       );
 
       if (price > 0) {
