@@ -42,10 +42,10 @@ async function savePinnedMessages(
 export async function setPinMessageContent(
   channelId: string,
   messageContent: string,
-  every: number,
+  every: number | undefined,
 ) {
   const pinMessageContents = await loadPinMessageContents();
-  const pinMessageContent = pinMessageContents.find(
+  const pinMessageContent: any = pinMessageContents.find(
     (pmc) => pmc.channel === channelId,
   );
 
@@ -65,7 +65,7 @@ export async function setPinMessageContent(
     pinMessageContents.push({
       channel: channelId,
       message: messageContent,
-      every: every,
+      every: pinMessageContent ? pinMessageContent.every : every || 1,
     });
   }
 
