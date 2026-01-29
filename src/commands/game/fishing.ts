@@ -6,7 +6,6 @@ import {
   TextChannel,
 } from "discord.js";
 import { formatMoney, getBalance, setBalance } from "../../util/money";
-import { zstdCompress } from "zlib";
 
 export const data = new SlashCommandBuilder()
   .setName("낚시")
@@ -35,6 +34,14 @@ export const data = new SlashCommandBuilder()
   )
   .addSubcommand((subcommand) =>
     subcommand.setName("올리기").setDescription("던진 낚시줄을 올립니다."),
+  )
+  .addSubcommand((subcommand) =>
+    subcommand.setName("현황").setDescription("현재 낚시 현황을 확인합니다."),
+  )
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName("종료")
+      .setDescription("모든 낚시 세션을 종료합니다. (관리자 전용)"),
   )
   .setDescription("낚시를 합니다.");
 
@@ -76,7 +83,59 @@ export async function executeFishing(interaction: any) {
     await executeThrow(interaction);
   } else if (subcommand === "올리기") {
     await executeRaise(interaction);
+  } else if (subcommand === "현황") {
+    await executeStatus(interaction);
+  } else if (subcommand === "종료") {
+    if (!interaction.member.permissions.has("Administrator")) {
+      await interaction.reply({
+        content: "이 명령어를 사용할 권한이 없습니다.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    for (const session of currentlyFishing) {
+      clearTimeout(session.timeout);
+    }
+    currentlyFishing.splice(0, currentlyFishing.length);
+
+    const mentions = currentlyFishing.map((f) => `<@${f.userId}>`).join(", ");
+
+    await interaction.reply({
+      content: `모든 낚시 세션을 종료했습니다. ${mentions}`,
+    });
   }
+}
+
+async function executeStatus(interaction: any) {
+  const session = currentlyFishing.find(
+    (f) => f.userId === interaction.user.id,
+  );
+
+  if (!session) {
+    await interaction.reply({
+      content: "낚시를 하고 있지 않습니다!",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  const messages = [];
+  for (const f of currentlyFishing) {
+    const user = interaction.guild.members.cache.get(f.userId);
+    const displayName =
+      user?.displayname || user?.user.username || "알 수 없음";
+    messages.push(
+      `- ${displayName}님이 낚시 중입니다. (미끼 가격: ${formatMoney(
+        f.baitPrice,
+      )}, 최대 대기 시간: ${f.time}분)`,
+    );
+  }
+
+  await interaction.reply({
+    content: messages.join("\n"),
+    flags: MessageFlags.Ephemeral,
+  });
 }
 
 async function executeRaise(interaction: any) {
