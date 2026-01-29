@@ -3,6 +3,7 @@ import {
   ButtonStyle,
   MessageFlags,
   SlashCommandBuilder,
+  TextChannel,
 } from "discord.js";
 import { formatMoney, getBalance, setBalance } from "../../util/money";
 
@@ -28,7 +29,12 @@ export const data = new SlashCommandBuilder()
   )
   .setDescription("낚시를 합니다.");
 
-const currentlyFishing: Set<string> = new Set();
+const currentlyFishing: {
+  userId: string;
+  time: number;
+  baitPrice: number;
+  channel: TextChannel;
+}[] = [];
 
 const messages = [
   {
@@ -66,7 +72,7 @@ export async function execute(interaction: any) {
     return;
   }
 
-  if (currentlyFishing.has(interaction.user.id)) {
+  if (currentlyFishing.find((f) => f.userId === interaction.user.id)) {
     await interaction.reply({
       content: "이미 낚시를 하고 있습니다!",
       flags: MessageFlags.Ephemeral,
@@ -76,7 +82,7 @@ export async function execute(interaction: any) {
 
   await interaction.reply({
     content:
-      `낚시를 시작합니다! 최대 대기 시간: ${time}분\n` +
+      `<@${interaction.user.id}>님이 낚시를 시작합니다! 최대 대기 시간: ${time}분, 미끼 가격: ${formatMoney(baitPrice)}\n` +
       `낚시대에 반응이 오면 멘션으로 알려드립니다. ` +
       `메시지에 있는 버튼을 30초 안에 누르면 낚시에 성공합니다.`,
   });
@@ -91,11 +97,20 @@ export async function execute(interaction: any) {
     Math.floor(Math.random() * time * 60000),
   );
 
-  currentlyFishing.add(interaction.user.id);
+  currentlyFishing.push({
+    userId: interaction.user.id,
+    time,
+    baitPrice,
+    channel: interaction.channel,
+  });
 }
 
 async function notifyFishing(interaction: any, button: ButtonBuilder) {
-  await interaction.followUp({
+  const session = currentlyFishing.find(
+    (f) => f.userId === interaction.user.id,
+  )!;
+
+  await session.channel.send({
     content: `<@${interaction.user.id}> 낚시대가 흔들립니다! 버튼을 눌러 낚시대를 감아보세요!`,
     components: [{ type: 1, components: [button] }],
   });
@@ -112,9 +127,6 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
     ) {
       const rand = Math.random();
       let result = messages[0]!;
-      const time = interaction.options.getNumber("시간") || 5;
-      const baitPrice = interaction.options.getNumber("미끼") || 10;
-
       for (const message of messages) {
         if (rand >= message.value) {
           result = message;
@@ -122,11 +134,11 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
       }
 
       const price = Math.max(
-        -baitPrice,
+        -session.baitPrice,
         Math.round(
-          baitPrice *
-            time *
-            time *
+          session.baitPrice *
+            session.time *
+            session.time *
             (result.multiplier + 0.002 * (Math.random() - 0.5)),
         ),
       );
@@ -148,15 +160,27 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
       });
 
       collector.stop();
-      currentlyFishing.delete(interaction.user.id);
+      currentlyFishing.splice(
+        currentlyFishing.findIndex((f) => f.userId === interaction.user.id),
+        1,
+      );
     }
   });
 
   collector.on("end", async (collected: any) => {
     if (collected.size === 0) {
+      const balance = await getBalance(interaction.user.id);
+      await setBalance(interaction.user.id, balance - session.baitPrice);
+
       await interaction.followUp({
-        content: "낚시에 실패했습니다. 다음에 다시 시도해보세요!",
+        content:
+          `<@${interaction.user.id}>님이 낚시대 감기에 실패했습니다... ` +
+          `${formatMoney(session.baitPrice)}를 잃었습니다.`,
       });
+      currentlyFishing.splice(
+        currentlyFishing.findIndex((f) => f.userId === interaction.user.id),
+        1,
+      );
     }
   });
 }
