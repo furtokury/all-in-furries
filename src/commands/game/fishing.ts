@@ -76,7 +76,7 @@ const messages = [
   },
 ];
 
-export async function executeFishing(interaction: any) {
+export async function execute(interaction: any) {
   const subcommand = interaction.options.getSubcommand();
 
   if (subcommand === "시작") {
