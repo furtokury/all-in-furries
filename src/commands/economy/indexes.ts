@@ -224,27 +224,22 @@ async function executeStatus(interaction: any) {
   const descriptions = [];
   for (const balance of balances) {
     const value = await getIndexValue(balance.name);
-    if (value !== null) {
-      const totalValue = value * balance.count;
+    if (!value) continue;
 
-      let boughtAtInfo = "";
-      if (balance.boughtAt) {
-        const profitLoss =
-          ((value - balance.boughtAt) / balance.boughtAt) * 100;
-        const profitLossSign = profitLoss > 0 ? "+" : "";
-        boughtAtInfo = `, 매수가: ${(balance.boughtAt * balance.count).toFixed(
-          2,
-        )} (${profitLossSign}${profitLoss.toFixed(2)}%)`;
-      }
+    const totalValue = value * balance.count;
 
-      descriptions.push(
-        `**${balance.name}**: ${balance.count}주 (현재 가치: ${formatMoney(totalValue)}${boughtAtInfo})`,
-      );
-    } else {
-      descriptions.push(
-        `**${balance.name}**: ${balance.count}주 (현재 상장되지 않음)`,
-      );
+    let boughtAtInfo = "";
+    if (balance.boughtAt) {
+      const profitLoss = ((value - balance.boughtAt) / balance.boughtAt) * 100;
+      const profitLossSign = profitLoss > 0 ? "+" : "";
+      boughtAtInfo =
+        `, 매수가: ${formatMoney(balance.boughtAt * balance.count)} ` +
+        `(${profitLossSign}${profitLoss.toFixed(2)}% = ${formatMoney((value - balance.boughtAt) * balance.count)})`;
     }
+
+    descriptions.push(
+      `**${balance.name}**: ${balance.count}주 (현재 가치: ${formatMoney(totalValue)}${boughtAtInfo})`,
+    );
   }
 
   await interaction.editReply(
