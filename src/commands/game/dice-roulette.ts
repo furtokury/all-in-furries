@@ -7,7 +7,7 @@ import {
 import { createComponentCollector } from "./dice-roulette/create-component-collector";
 
 export const IMAGE_URL =
-  "https://github.com/furtokury/all-in-furries/blob/main/res/dice_roulette_discord.png?raw=true";
+  "https://github.com/furtokury/all-in-furries/blob/main/res/dice_roulette_discord.jpg?raw=true";
 
 export const data = new SlashCommandBuilder()
   .setName("주사위룰렛")
