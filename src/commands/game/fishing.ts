@@ -19,7 +19,7 @@ export const data = new SlashCommandBuilder()
             "대기 시간이 길수록 더 좋은 보상을 획득할 확률이 커집니다 (분, 기본값: 5분)",
           )
           .setRequired(false)
-          .setMinValue(1)
+          .setMinValue(5)
           .setMaxValue(600),
       )
       .addNumberOption((option) =>
