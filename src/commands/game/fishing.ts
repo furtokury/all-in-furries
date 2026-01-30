@@ -19,7 +19,7 @@ export const data = new SlashCommandBuilder()
             "대기 시간이 길수록 더 좋은 보상을 획득할 확률이 커집니다 (분, 기본값: 5분)",
           )
           .setRequired(false)
-          .setMinValue(5)
+          .setMinValue(1)
           .setMaxValue(600),
       )
       .addNumberOption((option) =>
@@ -101,6 +101,9 @@ async function executeTerminate(interaction: any) {
 
   for (const session of currentlyFishing) {
     clearTimeout(session.timeout);
+
+    const balance = await getBalance(session.userId);
+    await setBalance(session.userId, balance + session.baitPrice);
   }
 
   const mentions = currentlyFishing.map((f) => `<@${f.userId}>`).join(", ");
@@ -148,6 +151,12 @@ async function executeRaise(interaction: any) {
     return;
   }
 
+  const balance = await getBalance(interaction.user.id);
+  await setBalance(
+    interaction.user.id,
+    balance + currentlyFishing[sessionIndex]!.baitPrice,
+  );
+
   clearTimeout(currentlyFishing[sessionIndex]!.timeout);
 
   currentlyFishing.splice(sessionIndex, 1);
@@ -188,13 +197,8 @@ async function executeThrow(interaction: any) {
 
   await setBalance(interaction.user.id, balance - baitPrice);
 
-  const button = new ButtonBuilder()
-    .setCustomId(`fish_catch_${interaction.user.id}`)
-    .setLabel("낚시대 감기")
-    .setStyle(ButtonStyle.Primary);
-
   const timeout = setTimeout(
-    async () => notifyFishing(interaction, button),
+    async () => notifyFishing(interaction),
     Math.floor(Math.random() * time * 60000),
   );
 
@@ -207,7 +211,12 @@ async function executeThrow(interaction: any) {
   });
 }
 
-async function notifyFishing(interaction: any, button: ButtonBuilder) {
+async function notifyFishing(interaction: any) {
+  const button = new ButtonBuilder()
+    .setCustomId(`fish_catch_${interaction.user.id}`)
+    .setLabel("낚시대 감기")
+    .setStyle(ButtonStyle.Primary);
+
   const session = currentlyFishing.find(
     (f) => f.userId === interaction.user.id,
   )!;
@@ -265,7 +274,7 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
             ? `축하합니다! ${formatMoney(price)}를 획득했습니다!`
             : price < 0
               ? `아쉽게도 ${formatMoney(-price)}를 잃었습니다...`
-              : "하지만 소지금에는 아무런 변화가 없습니다."),
+              : "미끼값을 되돌려 받았습니다."),
         components: [],
       });
 
@@ -273,19 +282,13 @@ async function notifyFishing(interaction: any, button: ButtonBuilder) {
     }
   });
 
-  collector.on("end", async (_collected: any) => {
-    if (
-      currentlyFishing.findIndex((f) => f.userId === interaction.user.id) === -1
-    )
-      return;
-
-    const balance = await getBalance(interaction.user.id);
-    await setBalance(interaction.user.id, balance - session.baitPrice);
+  collector.on("end", async (collected: any) => {
+    if (collected.size > 0) return;
 
     await response.edit({
       content:
-        `<@${interaction.user.id}>님이 낚시대 감기에 실패했습니다... ` +
-        `${formatMoney(session.baitPrice)}를 잃었습니다.`,
+        `<@${interaction.user.id}>님이 낚시대를 놓쳤습니다... ` +
+        `미끼값 ${formatMoney(session.baitPrice)}을 잃었습니다.`,
       components: [],
     });
 
