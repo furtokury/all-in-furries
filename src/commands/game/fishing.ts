@@ -60,7 +60,7 @@ const messages = [
     multiplier: -0.001,
   },
   {
-    value: 0.1,
+    value: 0.03,
     message: "아무것도 낚이지 않았습니다.",
     multiplier: 0,
   },
