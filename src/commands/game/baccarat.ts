@@ -175,6 +175,8 @@ export async function execute(interaction: any) {
     }
   }
 
+  const newBalance = await getBalance(interaction.user.id);
+
   contents.push(
     `* 최종 결과: 플레이어 **${playerScore}** - 뱅커 **${bankerScore}**`,
   );
@@ -186,7 +188,7 @@ export async function execute(interaction: any) {
       contents.push(
         `* 플레이어에 베팅한 **${formatMoney(playerBet)}이 당첨**되었습니다!`,
       );
-      await setBalance(interaction.user.id, balance + playerBet * 2);
+      await setBalance(interaction.user.id, newBalance + playerBet * 2);
     }
     if (bankerBet > 0) {
       contents.push(
@@ -204,7 +206,7 @@ export async function execute(interaction: any) {
       contents.push(
         `* 뱅커에 베팅한 **${formatMoney(bankerBet)}이 당첨**되었습니다!`,
       );
-      await setBalance(interaction.user.id, balance + bankerBet * 1.95);
+      await setBalance(interaction.user.id, newBalance + bankerBet * 1.95);
     }
     if (playerBet > 0) {
       contents.push(
@@ -222,19 +224,19 @@ export async function execute(interaction: any) {
       contents.push(
         `* 타이에 베팅한 **${formatMoney(tieBet)}이 당첨**되었습니다!`,
       );
-      await setBalance(interaction.user.id, balance + tieBet * 9);
+      await setBalance(interaction.user.id, newBalance + tieBet * 9);
     }
     if (playerBet > 0) {
       contents.push(
         `* 플레이어에 베팅한 **${formatMoney(playerBet)}이 반환**되었습니다.`,
       );
-      await setBalance(interaction.user.id, balance + playerBet);
+      await setBalance(interaction.user.id, newBalance + playerBet);
     }
     if (bankerBet > 0) {
       contents.push(
         `* 뱅커에 베팅한 **${formatMoney(bankerBet)}이 반환**되었습니다.`,
       );
-      await setBalance(interaction.user.id, balance + bankerBet);
+      await setBalance(interaction.user.id, newBalance + bankerBet);
     }
   }
 
