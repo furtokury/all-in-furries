@@ -212,14 +212,17 @@ async function executeThrow(interaction: any) {
 }
 
 async function notifyFishing(interaction: any) {
+  const session = currentlyFishing.find(
+    (f) => f.userId === interaction.user.id,
+  );
+  if (!session) {
+    return;
+  }
+
   const button = new ButtonBuilder()
     .setCustomId(`fish_catch_${interaction.user.id}`)
     .setLabel("낚시대 감기")
     .setStyle(ButtonStyle.Primary);
-
-  const session = currentlyFishing.find(
-    (f) => f.userId === interaction.user.id,
-  )!;
 
   const response = await session.channel.send({
     content: `<@${interaction.user.id}> 낚시대가 흔들립니다! 버튼을 눌러 낚시대를 감아보세요!`,
@@ -236,10 +239,20 @@ async function notifyFishing(interaction: any) {
       i.customId === `fish_catch_${interaction.user.id}` &&
       i.user.id === interaction.user.id
     ) {
-      currentlyFishing.splice(
-        currentlyFishing.findIndex((f) => f.userId === interaction.user.id),
-        1,
+      const sessionIndex = currentlyFishing.findIndex(
+        (f) => f.userId === interaction.user.id,
       );
+
+      if (sessionIndex === -1) {
+        await i.update({
+          content: "이미 취소된 낚시입니다.",
+          components: [],
+        });
+        collector.stop();
+        return;
+      }
+      const collectedSession = currentlyFishing[sessionIndex]!;
+      currentlyFishing.splice(sessionIndex, 1);
 
       const rand = Math.random();
       let result = messages[0]!;
@@ -250,11 +263,11 @@ async function notifyFishing(interaction: any) {
       }
 
       const price = Math.max(
-        -session.baitPrice,
+        -collectedSession.baitPrice,
         Math.round(
-          session.baitPrice *
-            session.time *
-            session.time *
+          collectedSession.baitPrice *
+            collectedSession.time *
+            collectedSession.time *
             (result.multiplier + 0.002 * (Math.random() - 0.5)),
         ) * 0.1,
       );
@@ -263,7 +276,7 @@ async function notifyFishing(interaction: any) {
         const currentBalance = await getBalance(interaction.user.id);
         await setBalance(
           interaction.user.id,
-          currentBalance + session.baitPrice + price,
+          currentBalance + collectedSession.baitPrice + price,
         );
       }
 
@@ -285,16 +298,25 @@ async function notifyFishing(interaction: any) {
   collector.on("end", async (collected: any) => {
     if (collected.size > 0) return;
 
+    const sessionIndex = currentlyFishing.findIndex(
+      (f) => f.userId === interaction.user.id,
+    );
+    if (sessionIndex === -1) {
+      await response.edit({
+        content: "이 낚시는 취소되었습니다.",
+        components: [],
+      });
+      return;
+    }
+
+    const timedOutSession = currentlyFishing[sessionIndex]!;
+    currentlyFishing.splice(sessionIndex, 1);
+
     await response.edit({
       content:
         `<@${interaction.user.id}>님이 낚시대를 놓쳤습니다... ` +
-        `미끼값 ${formatMoney(session.baitPrice)}을 잃었습니다.`,
+        `미끼값 ${formatMoney(timedOutSession.baitPrice)}을 잃었습니다.`,
       components: [],
     });
-
-    currentlyFishing.splice(
-      currentlyFishing.findIndex((f) => f.userId === interaction.user.id),
-      1,
-    );
   });
 }
