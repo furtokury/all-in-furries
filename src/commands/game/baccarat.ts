@@ -141,7 +141,7 @@ export async function execute(interaction: any) {
   let playerScore = calculateScore(playerHand);
   let bankerScore = calculateScore(bankerHand);
 
-  if (playerScore <= 5) {
+  if (playerScore <= 5 && !(bankerScore === 8 || bankerScore === 9)) {
     contents.push("* 플레이어가 세 번째 카드를 뽑습니다.");
     await message.edit(contents.join("\n"));
     await sleep(1000);
@@ -173,6 +173,18 @@ export async function execute(interaction: any) {
       await message.edit(contents.join("\n"));
       await sleep(1000);
     }
+  } else if (bankerScore <= 2) {
+    contents.push("* 뱅커가 세 번째 카드를 뽑습니다.");
+    await message.edit(contents.join("\n"));
+    await sleep(1000);
+
+    bankerHand.push(drawCard(deck));
+    bankerScore = calculateScore(bankerHand);
+    contents.push(
+      `* 뱅커에게 **${josa(bankerHand[bankerHand.length - 1].face, "이/가")}** 배분되었습니다. (합: **${bankerScore}**)`,
+    );
+    await message.edit(contents.join("\n"));
+    await sleep(1000);
   }
 
   const newBalance = await getBalance(interaction.user.id);
