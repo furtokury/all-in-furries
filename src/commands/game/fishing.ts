@@ -272,13 +272,11 @@ async function notifyFishing(interaction: any) {
         ) * 0.1,
       );
 
-      if (price > 0) {
-        const currentBalance = await getBalance(interaction.user.id);
-        await setBalance(
-          interaction.user.id,
-          currentBalance + collectedSession.baitPrice + price,
-        );
-      }
+      const currentBalance = await getBalance(interaction.user.id);
+      await setBalance(
+        interaction.user.id,
+        currentBalance + collectedSession.baitPrice + price,
+      );
 
       await i.update({
         content:
