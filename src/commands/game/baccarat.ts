@@ -144,7 +144,7 @@ export async function execute(interaction: any) {
   let playerScore = calculateScore(playerHand);
   let bankerScore = calculateScore(bankerHand);
 
-  if (playerScore <= 5 && !(bankerScore === 8 || bankerScore === 9)) {
+  if (playerScore <= 5 && bankerScore < 8) {
     contents.push("* 플레이어가 세 번째 카드를 뽑습니다.");
     await message.edit(contents.join("\n"));
     await sleep(1000);
@@ -176,7 +176,7 @@ export async function execute(interaction: any) {
       await message.edit(contents.join("\n"));
       await sleep(1000);
     }
-  } else if (bankerScore <= 2) {
+  } else if (bankerScore <= 2 && playerScore < 8) {
     contents.push("* 뱅커가 세 번째 카드를 뽑습니다.");
     await message.edit(contents.join("\n"));
     await sleep(1000);
