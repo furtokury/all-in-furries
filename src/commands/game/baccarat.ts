@@ -68,7 +68,10 @@ export async function execute(interaction: any) {
 
   await setBalance(interaction.user.id, balance - totalBet);
 
-  const contents = ["* 바카라 게임에 오신 것을 환영합니다!"];
+  const contents = [
+    "* 바카라 게임에 오신 것을 환영합니다!",
+    "* 바카라 스코어보드는 [이 링크](https://me.shtelo.org/baccarat-trend)에서 사용할 수 있습니다.",
+  ];
 
   const message = await interaction.reply(contents.join("\n"));
   await sleep(1000);
